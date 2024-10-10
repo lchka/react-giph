@@ -1,49 +1,69 @@
-import { useState, useEffect } from "react";
 import axios from 'axios';
-import { Card, Row, Col } from "react-bootstrap";
-
-
+import { useEffect, useState } from 'react';
+import { Card, Row } from 'react-bootstrap'
+import Search from './Search';
 
 const GiphCard = (props) => {
-    return (
-      <Col>
-        <Card>
-          <Card.Img variant="top" src={props.url} />
-          <Card.Body>
-            <Card.Title>{props.title}</Card.Title>
-          </Card.Body>
-        </Card>
-      </Col>
-    );
-  };
+    const { image, title, url } = props
 
+    return (
+        <Card style={{ maxHeight: "20rem" }}>
+            <Card.Img
+                variant="top"
+                src={image}
+                className="object-fit-cover h-75 pt-2"
+            />
+            <Card.Body>
+                <Card.Title>
+                    <a href={url}>{title}</a>
+                </Card.Title>
+            </Card.Body>
+        </Card>
+    )
+}
 
 const GiphyViewer = () => {
-  const GIPHY_API_KEY = "zS8ylSqoBUwvEZj2Vs15oVsNQ7eJydkX";
-  const GIPHY_URL = "https://api.giphy.com/v1/gifs/search";
 
-  const [gifs, setGifs] = useState([]);
+    const GIPHY_URL = 'http://api.giphy.com/v1/gifs/trending'
+    const GIPHY_API_KEY = '43AL10dIQe6L9zoznaWwuQP7ULNFOk0e'
 
-  useEffect(() => {
-    axios.get(`${GIPHY_URL}?api_key=${GIPHY_API_KEY}&q=cat&limit=5`)
-      .then((res) => {
-        console.log(res.data.data);
-        setGifs(res.data.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, []);
+    const [gifs, setGifs] = useState([])
 
-  return (
-    <Row xs={1} md={3} lg={3}>
-      {
-        gifs.map((gif) => (
-          <GiphCard key={gif.id} url={gif.images.fixed_height.url} title={gif.title} />
-        ))
-      }
-    </Row>
-  );
-};
+    useEffect(() => {
+        axios.get(`${GIPHY_URL}?apikey=${GIPHY_API_KEY}`)
+            .then(({ data }) => {
+                console.log(data.data)
+                setGifs(data.data)
+            })
+            .catch((res) => {
+                console.error(res)
+            })
+    }, [])
+
+    return (
+        <>
+            <Search setGifs={setGifs} />
+            <Row xs={1} md={2} lg={3}>
+                {/* Using curly brackets, we need the return keyword */}
+
+                {
+                    gifs.map((gif) => {
+                        return <GiphCard
+                            key={gif.id}
+                            image={gif.images.fixed_width.url}
+                            url={gif.url}
+                            title={gif.title}
+                        />
+                    })
+
+                    // Using soft brackets, the return is implied. No keyword needed.
+                    // gifs.map((gif) => (
+                    //     <GiphCard key={gif.id} image={gif.images.fixed_width.url} url={gif.url} title={gif.title} />
+                    // ))
+                }
+            </Row>
+        </>
+    )
+}
 
 export default GiphyViewer;
